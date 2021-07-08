@@ -1,0 +1,12 @@
+User
+
+Nome
+Telefone
+cpf
+
+
+CEP
+Endereco
+Bairro 
+Cidade
+Estado
