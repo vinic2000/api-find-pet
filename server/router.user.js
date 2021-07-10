@@ -1,39 +1,82 @@
 const express = require('express')
-const { regexp } = require('sequelize/types/lib/operators')
 const app = express()
 
 //importando model de usuário
 const Users =  require('../modal/user.modal')
 
-app.post('/user/add/', (req, res) => {
-    const user = await Users.create({
-        nome: req.body.nome,
-        telefone: req.body.telefone,
-        cpf: req.body.cpf,
-        cep: req.body.cep,
-        endereco: req.body.endereco,
-        bairro: req.body.endereco,
-        cidade: req.body.cidade,
-        estado: req.body.estado
-    });
+app.post('/user/add', (req, res) => {
 
-    res.json({Sucess: "Usuário cadastrado com sucesso"})
+        const {nome, telefone, cpf, cep, endereco, bairro, cidade, estado} = req.body;
+
+        Users.create({
+            nome, 
+            telefone, 
+            cpf, 
+            cep, 
+            endereco, 
+            bairro, 
+            cidade, 
+            estado
+        }).then(res.json({success: "OK"}))
+        .catch(err => res.json({erro: err}));
+
 });
   
-app.post('/user/edit/:id', (req, res) => {
-    res.json({sucess: 'ok'})
-})
+app.put('/user/edit/:id', (req, res) => {
+
+    const {id} =  req.params;
+    const {nome, telefone, cpf, cep, endereco, bairro, cidade, estado} = req.body;
+
+    Users.update({
+        nome, telefone, cpf, cep, endereco, bairro, cidade, estado
+    },{where:{
+        id:id,
+        status:true
+    }})
+        .then(result => {
+            console.log(result);
+            if(result == false){
+                res.json({erro : "user can' be alter. User didn't find"})
+            }
+            res.json({success:"OK"})
+        })
+        .catch(err => res.json({err}));
+});
 
 app.delete('/user/del/:id', (req, res) => {
-    res.json({sucess: 'ok'})
+
+    const {id} =  req.params;
+
+    Users.update({status:false},{
+        where:{
+            id,
+            status:true
+        }
+    }).then(res.json({success: 'ok'}))
+    .catch(err => res.json({erro:err}))
+
 })
 
 app.get('/user/all', (req, res) => {
-    res.json({sucess: 'ok'})
+
+    Users.findAll({where:{
+        status:true
+    }})
+        .then( result => res.json({user:result}))
+        .catch(err => console.log(`Erro: ${err}`));
 })
 
 app.get('/user/:id', (req, res) => {
-    res.json({sucess: 'ok'})
+    
+    const {id} =  req.params;
+    
+    Users.findByPk(id)
+        .then(user => {
+            res.json({user})
+            console.log(user)
+        })
+        .catch(err => res.json({erro: err}));
+
 })
 
 module.exports = app;
